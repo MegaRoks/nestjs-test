@@ -1,0 +1,62 @@
+version: '3.7'
+
+services:
+    nestjs-container:
+        container_name: nestjs_container
+        restart: always
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+            target: development
+        environment:
+            - SERVER_PORT=${SERVER_PORT}
+            - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+            - DATABASE_USERNAME=${DATABASE_USERNAME}
+            - DATABASE_PORT=${DATABASE_PORT}
+            - DATABASE_HOST=${DATABASE_HOST}
+        ports:
+            - ${SERVER_PORT}:${SERVER_PORT}
+        volumes:
+            - ./:/usr/src/app:cached
+        command: yarn start:dev
+        env_file:
+            - .env
+        networks:
+            - service_network
+
+    mysql-container:
+        container_name: mysql-container
+        image: mysql:8.0.21
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DATA_BASE_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${DATABASE_NAME}
+            MYSQL_USER: ${DATABASE_USERNAME}
+            MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+        ports:
+            - ${DATABASE_PORT}:3306
+        volumes:
+            - mysql_data:/var/lib/mysql
+        command: --default-authentication-plugin=mysql_native_password
+        env_file:
+            - .env
+        networks:
+            - service_network
+
+    adminer-container:
+        container_name: adminer-container
+        image: adminer:4.7.7
+        restart: always
+        ports:
+            - ${CLIENT_DATABASE_PORT}:8080
+        networks:
+            - service_network
+
+networks:
+    service_network:
+        driver: bridge
+        name: service_network
+
+volumes:
+    mysql_data:
+        name: mysql_data
