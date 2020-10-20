@@ -1,4 +1,6 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+
+import { User } from './../../user/entity/user.entity';
 
 @Entity('thanks')
 export class Thank extends BaseEntity {
@@ -13,6 +15,10 @@ export class Thank extends BaseEntity {
 
     @Column({ nullable: true, type: 'varchar', length: 200 })
     public readonly reason: string;
+
+    @ManyToOne(() => User, (user: User) => user.thanks)
+    @JoinColumn({ name: 'todoId' })
+    public readonly user: User;
 
     @CreateDateColumn()
     public readonly createdAt: Date;
